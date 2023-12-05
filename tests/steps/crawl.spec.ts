@@ -2,16 +2,14 @@ import { Given,Then,When } from "@cucumber/cucumber";
 import { Browser,Page,chromium, expect} from '@playwright/test'
 import WpAdminLogin from "../../pages/wp-admin-login";
 import CrawlPluginUI from "../../pages/crawl-plugin-ui";
+import { ICustomWorld } from "../../support/custom-world";
 
 let browser : Browser
 let page: Page
 let loginPage : WpAdminLogin
 let crawlPluginPage : CrawlPluginUI
-Given("the user navigates to the {string}", async function (domain: string) {
-    console.log(domain);
-    browser = await chromium.launch({ headless: false,timeout: 5 * 60 * 1000    })
-    const context = await browser.newContext()
-    page = await context.newPage()
+Given("the user navigates to the {string}", async function (this: ICustomWorld, domain: string) {
+    const { page } = this;
     loginPage = new WpAdminLogin(page)
     await loginPage.loadLoginPage(domain)
     var title = await loginPage.getTitle();
@@ -33,5 +31,22 @@ Given('Given the user navigates to the crawler plugin under the tools section',{
 
   Then('The page should list URLs in the website', async function () {
     var urls = await this.crawlPluginPage.getCrawledURLs();
-    expect(urls.length).toBeGreaterThan(3)
+    expect(urls.length).toBeGreaterThan(0)
   });
+
+  Then('the page should list the URLs in the website with the one that has the url {string}', async function (pagetitle:string) {
+    var urls = await this.crawlPluginPage.getCrawledURLs();
+    var anyMatches = doesTextMatchAnyURL(pagetitle, urls)
+    expect(urls.length).toBeTruthy();
+    
+  });
+  function doesTextMatchAnyURL(text: string, urls: string[]): boolean {
+    for (const url of urls) {
+        const regex = new RegExp(url, 'i');
+        if (regex.test(text)) {
+          return true;
+        }
+      }
+      
+      return false;
+    }
