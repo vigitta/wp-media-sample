@@ -8,3 +8,5 @@ To run the automated scripts,
 - Run `npm run test`
 
 To adjust the parameters such as the domain name of the wordpress instance, open the `.feature` file in the `/features/` directory and adjust the examples.
+
+The headless mode can be turned off by setting the headless value to `false` in config.ts file.
